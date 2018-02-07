@@ -9,7 +9,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import main.Game;
 import objects.Field;
-
+import objects.Ship;
 
 public class GameStageController
 {
@@ -32,6 +32,9 @@ public class GameStageController
     @FXML
     Label shotsLabel;
 
+    @FXML
+    Label rekordLabel;
+
     RectangleXY[][] seaSquares;
     final int squareSize = 30;
 
@@ -49,7 +52,7 @@ public class GameStageController
                 fieldsGridPane.add(seaSquares[x][y], x, y);
                 seaSquares[x][y].setOnMouseClicked(event -> {
                     Game.shotsCounter++;
-                    final Field thisField = Field.create(xx, yy, null);
+                    final Field thisField = Field.create(xx, yy);
                     boolean struck = false;
                     for (Field field : Game.occupiedFields)
                         if (thisField.equals(field))
@@ -57,6 +60,12 @@ public class GameStageController
                             seaSquares[xx][yy].setStruck();
                             field.getShip().getStruck(field);
                             Game.struckCounter++;
+                            if (field.getShip().isStruck())
+                            {
+                             //   if (Game.shipsCounter != 0)
+                                //    throwStruckAlert();
+                                setRestrictedArea(field.getShip());
+                            }
                             struck = true;
                             break;
                         }
@@ -65,6 +74,7 @@ public class GameStageController
                     shipsLabel.setText("Statków do zniszczenia:\n" + Game.shipsCounter);
                     shotsOnTargetLabel.setText("Strzały celne:\n" + Game.struckCounter);
                     shotsLabel.setText("Strzały ogółem:\n" + Game.shotsCounter);
+                    rekordLabel.setText("Rekord gry:\n" + Game.highScore);
 
                     if(Game.shipsCounter == 0)
                     {
@@ -73,6 +83,9 @@ public class GameStageController
                         gameOverAlert.setHeaderText("Gratulacje!");
                         gameOverAlert.setContentText("Udało Ci się zestrzelić wszystkie statki! Gratulacje!\n Twój wynik to " + Game.shotsCounter + " strzałów!");
                         gameOverAlert.show();
+                        if (Game.shotsCounter < Game.highScore)
+                            Game.highScore = Game.shotsCounter;
+                        rekordLabel.setText("Rekord gry:\n" + Game.highScore);
                     }
                 });
             }
@@ -86,30 +99,52 @@ public class GameStageController
         shipsLabel.setText("Statków do zniszczenia:\n" + Game.shipsOnStage);
         shotsOnTargetLabel.setText("Strzały celne:\n0");
         shotsLabel.setText("Strzały ogółem:\n0");
+        rekordLabel.setText("Rekord gry:\n" + Game.highScore);
 
     }
 
+    private void throwStruckAlert()
+    {
+        Alert shipStruckAlert = new Alert(Alert.AlertType.INFORMATION);
+        shipStruckAlert.setTitle("Zatopienie!");
+        shipStruckAlert.setHeaderText("");
+        shipStruckAlert.setContentText("Zatopiono statek!");
+        shipStruckAlert.show();
+    }
+
+    private void setRestrictedArea(Ship struckShip)
+    {
+        for (Field rstrField : struckShip.getRstrFields())
+            seaSquares[rstrField.getX()][rstrField.getY()].setRestricted();
+    }
 
     private class RectangleXY extends Rectangle
     {
 
-        public RectangleXY(Paint paint)
+        private RectangleXY(Paint paint)
         {
             setWidth(squareSize);
             setHeight(squareSize);
             setFill(paint);
         }
 
-        public void setStruck()
+        private void setStruck()
         {
             setFill(Paint.valueOf("red"));
             setDisable(true);
             setDisabled(true);
         }
 
-        public void setMissed()
+        private void setMissed()
         {
             setFill(Paint.valueOf("green"));
+            setDisable(true);
+            setDisabled(true);
+        }
+
+        private void setRestricted()
+        {
+            setFill(Paint.valueOf("blue"));
             setDisable(true);
             setDisabled(true);
         }

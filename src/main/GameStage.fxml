@@ -89,6 +89,11 @@
                <font>
                   <Font size="18.0" />
                </font></Label>
+            <Label fx:id="rekordLabel" text="rekord" textAlignment="CENTER">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
